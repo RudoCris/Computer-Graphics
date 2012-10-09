@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Компьютерная Графика</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <canvas id="canvas" width="500" height="500">
+            <p>Ваш браузер не поддерживает HTML5</p>
+            <p>Рекомендую поставить <a href="http://google.com/chrome">Google Chrome</a></p>
+        </canvas>
+
+        <script src="util.js"></script>
+        <script src="shapes.js"></script>
+        <script>
+            window.onload = function () {
+                var canvas = document.getElementById('canvas'),
+                    context = canvas.getContext('2d'),
+                    mouse = utils.captureMouse(canvas),
+                    balls = new Array;
+                balls[0] = new Ball(10, '#f00', 50, 50);
+                balls[1] = new Ball(10, '#0f0', 120, 67);
+
+                canvas.addEventListener('dblclick', function(){
+                    var tmp_ball =  new Ball(10, get_random_color(), mouse.x, mouse.y);
+                    balls.push(tmp_ball);
+                }, false);
+
+
+                canvas.addEventListener('mousedown', function(){
+                    for(var i=balls.length-1; i>=0; i--){
+                        if(utils.containsPoint(balls[i].getBounds() , mouse.x, mouse.y)){
+                            balls[i].dragged = true;
+                            return true;
+                        }
+                    }
+                }, false);
+
+                canvas.addEventListener('mouseup', function(){
+                    if(balls.some(function(ball){return ball.dragged})){
+                        balls.forEach(function(ball, i){
+                            ball.dragged = false;
+                        });
+                    }
+                }, false);
+
+                canvas.addEventListener('mousemove', function () {
+                    balls.forEach(function(ball, i){
+                        if (ball.dragged) {
+                            ball.x = mouse.x;
+                            ball.y = mouse.y;
+                        }
+                    });
+                }, false);
+                var rect = new Rectangle('#6b6bff', 0.01, balls[0].x, balls[0].y);
+                (function drawFrame () {
+                    window.requestAnimationFrame(drawFrame, canvas);
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    rect.draw(balls, context);
+
+                    for(var i=0; i<balls.length-1; i++){
+                        context.beginPath();
+                        context.moveTo(balls[i].x, balls[i].y);
+                        context.lineTo(balls[i+1].x, balls[i+1].y);
+                        context.stroke();
+                        context.closePath();
+                        balls[i].draw(context);
+                        balls[i+1].draw(context);
+                    }
+
+                    context.beginPath();
+                    context.moveTo(balls[balls.length-1].x, balls[balls.length-1].y);
+                    context.lineTo(balls[0].x, balls[0].y);
+                    context.stroke();
+                }());
+            };
+        </script>
+    </body>
+</html>
