@@ -1,0 +1,44 @@
+<html>
+ <head>
+  <script type="application/x-javascript">
+    
+    
+    var el = document.getElementById('el');
+    el.addEventListener('click', getClickXY, false);
+	function getClickXY(event){
+		var clickX = (event.layerX == undefined ? event.offsetX : event.layerX) + 1;
+		var clickY = (event.layerY == undefined ? event.offsetY : event.layerY) + 1;
+		
+		function createImage(){
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+		ctx.fillRect(clickX, clickY, clickX + 50, clickY+50);
+		}
+	}
+    
+  </script>
+    
+    
+ </head>
+ <body onload="createImage();">
+   <div id="el"><canvas id="canvas" style="border: 2px solid black" width="200" height="200"> </canvas></div>
+ </body>
+</html>
+
+<html><head>
+<style type="text/css">
+#el{
+  width:200px;
+  height:70px;
+  position:relative;
+  top:20px;
+  left:50px;
+  background:#555}
+</style>
+</head><body>
+  
+<script type="text/javascript">
+
+</script>
+</body></html>
+
