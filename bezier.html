@@ -27,6 +27,8 @@
             }
 
 window.onload = function(){
+    /*Скрипт для чтения данных из файла (и вывода на консоль,
+      в дальнейшем можно из этого получить точки для кривых)*/
     function readlob() {
         var files = document.getElementById('files').files;
         var file = files[0];
@@ -38,9 +40,10 @@ window.onload = function(){
             }
         };
         reader.readAsBinaryString(file);
-        //console.log(file);
     }
+
     document.getElementById('files').addEventListener('change', readlob, false);
+
     var canvas = document.getElementById('canvas'),
         context = canvas.getContext('2d'),
         mouse = utils.captureMouse(canvas),
@@ -56,7 +59,10 @@ window.onload = function(){
         for(var i=balls.length-1; i>=0; i--){
             if(utils.containsPoint(balls[i].getBounds() , mouse.x, mouse.y)){
                 balls[i].dragged = true;
+                //раскомментируйте чтобы точки не сцеплялись..
+                //сцепление не реализовано
                 //return true;
+
             }
         }
     }, false);
@@ -76,15 +82,22 @@ window.onload = function(){
         });
     }, false);
 
+
+    /*  Изменяем эту переменную на 3 или 4 в зависимости от того
+        какую кривую хотим получить
+     */
     var typeOfCurve = 4;
 
+    /*Функция объявленная в круглых скобках сразу начинат выполняться
+        см документацию JavaScript
+     */
     (function drawFrame() {
         window.requestAnimationFrame(drawFrame, canvas);
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         for(var i=0; i<balls.length-(balls.length % typeOfCurve); i+=typeOfCurve){
-            var a = (typeOfCurve == 3) ? new CubicBezier(balls[i], balls[i+1], balls[i+2], 30, "#f00")
-                    : new QuadraticBezier(balls[i], balls[i+1], balls[i+2], balls[i+3], 30, "#f00");
+            var a = (typeOfCurve == 3) ? new CurveBezier(balls[i], balls[i+1], balls[i+2], 30, "#f00")
+                    : new CubicBezier(balls[i], balls[i+1], balls[i+2], balls[i+3], 30, "#f00");
             a.draw(context);
         }
 
@@ -97,11 +110,7 @@ window.onload = function(){
             logInfo = false;
         }
     }());
-
-
 }
 </script>
     </body>
-
 </html>
-

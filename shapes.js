@@ -3,7 +3,7 @@
  * n - частота
  * color - цвет в шеснадцатеричном коде (по умолчанию чёрный)
  */
-function QuadraticBezier(p1, p2, p3, p4, n, color) {
+function CubicBezier(p1, p2, p3, p4, n, color) {
     this.color = color ? color : "#000";
     this.n = n ? n : 30;
     this.p1 = p1 ? p1 : {x: 100, y: 100};
@@ -24,7 +24,7 @@ function QuadraticBezier(p1, p2, p3, p4, n, color) {
     this.gap3.x = (this.p4.x-this.p3.x)/this.n;
     this.gap3.y = (this.p4.y-this.p3.y)/this.n;
 }
-QuadraticBezier.prototype.draw = function (context) {
+CubicBezier.prototype.draw = function (context) {
     var np = {x: this.p1.x, y: this.p1.y};
     var next_point1 = {x: this.p1.x, y: this.p1.y},
         next_point2 = {x: this.p2.x, y: this.p2.x},
@@ -32,15 +32,6 @@ QuadraticBezier.prototype.draw = function (context) {
         temp_point1 = {x: this.p1.x, y: this.p1.y},
         temp_point2 = {x: this.p2.x, y: this.p2.y},
         temp_point3 = {x: this.p3.x, y: this.p3.y};
-    context.save();
-    context.beginPath();
-
-    context.moveTo(this.p1.x, this.p1.y);
-    context.lineTo(this.p2.x, this.p2.y);
-    context.lineTo(this.p3.x, this.p3.y);
-    context.lineTo(this.p4.x, this.p4.y);
-    context.stroke();
-    context.restore();
     context.save();
     context.beginPath();
     for(var i=0; i<=this.n; i++){
@@ -54,10 +45,6 @@ QuadraticBezier.prototype.draw = function (context) {
         np.y = next_point1.y + i*(next_point2.y - next_point1.y)/this.n;
         context.lineTo(np.x, np.y);
 
-        /*context.moveTo(temp_point1.x, temp_point1.y);
-        context.lineTo(temp_point2.x, temp_point2.y);
-        context.lineTo(temp_point3.x, temp_point3.y);
-*/
         temp_point1.x += this.gap1.x;
         temp_point1.y += this.gap1.y;
         temp_point2.x += this.gap2.x;
@@ -69,12 +56,12 @@ QuadraticBezier.prototype.draw = function (context) {
     context.stroke();
     context.restore();
 }
-/*Кубическая кривая Безье
+/*Квадратическая кривая Безье
  * p1, p2, p3 - контрольные точки
  * n - частота
  * color - цвет в шеснадцатеричном коде (по умолчанию чёрный)
  */
-function CubicBezier(p1, p2, p3, n, color){
+function CurveBezier(p1, p2, p3, n, color){
     this.color = color ? color : "#000";
     this.n = n ? n : 30;
     this.p1 = p1 ? p1 : {x: 100, y: 100};
@@ -94,18 +81,11 @@ function CubicBezier(p1, p2, p3, n, color){
 /* Собственно функция отрисовки на JavaScript
  * алгоритм тот что Семёнов давал
  */
-CubicBezier.prototype.draw = function (context) {
+CurveBezier.prototype.draw = function (context) {
     var next_point = {x: this.p1.x, y: this.p1.y};
     var temp_point1 = {x: this.p1.x, y: this.p1.y};
     var temp_point2 = {x: this.p2.x, y: this.p2.y};
 
-    context.save();
-    context.beginPath();
-    context.moveTo(this.p1.x, this.p1.y); //соединяем контрольные точки
-    context.lineTo(this.p2.x, this.p2.y);
-    context.lineTo(this.p3.x, this.p3.y);
-    context.stroke();
-    context.restore();
     context.save();
     context.beginPath();
     for(var i=0; i<=this.n; i++){
