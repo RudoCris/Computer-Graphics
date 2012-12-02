@@ -170,6 +170,7 @@ function Ball (radius, color, x, y) {
     this.radius = radius ? radius : 40;
     this.color = color ? color : "#f00";
     this.dragged = false;
+    this.always_drg = false;
     this.lineWidth = 1;
 }
 
