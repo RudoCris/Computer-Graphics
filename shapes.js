@@ -24,6 +24,10 @@ function CubicBezier(p1, p2, p3, p4, n, color) {
     this.gap3.x = (this.p4.x-this.p3.x)/this.n;
     this.gap3.y = (this.p4.y-this.p3.y)/this.n;
 }
+/**
+ * собственно реализация алгоритма которая рисования по Кльваджо
+ * см. learn.javascript.ru/bezier
+ */ 
 CubicBezier.prototype.draw = function (context) {
     var np = {x: this.p1.x, y: this.p1.y};
     var next_point1 = {x: this.p1.x, y: this.p1.y},
@@ -79,7 +83,7 @@ function CurveBezier(p1, p2, p3, n, color){
     this.gap2.y = (this.p3.y-this.p2.y)/this.n;
 }
 /* Собственно функция отрисовки на JavaScript
- * алгоритм тот что Семёнов давал
+ * см на learn.javascript.ru/bezier
  */
 CurveBezier.prototype.draw = function (context) {
     var next_point = {x: this.p1.x, y: this.p1.y};
@@ -109,15 +113,15 @@ CurveBezier.prototype.draw = function (context) {
  * dx, dy - координаты
  */
 function Rectangle(color, angle, dx, dy) {
-    this.angle = angle ? angle : 0.03;
+    this.angle = angle ? angle : 0.03; //угол поворота (по умолчанию 0,03)
     this.color = color ? color : '#6b6bff';
-    this.dx = dx ? dx : 0;
-    this.dy = dy ? dy : 0;
+    this.dx = dx ? dx : 0; //координаты
+    this.dy = dy ? dy : 0; 
     this.rotate = 0;
-    this.index_of_curr_point = 0;
-    this.index_of_next_point = 1;
-    this.to_point = {x: 0, y: 0};
-    this.from_point = {x: 0, y: 0};
+    this.index_of_curr_point = 0; //индек ткущей точки
+    this.index_of_next_point = 1; //индекс следующей точки
+    this.to_point = {x: 0, y: 0}; //следующая точка (координты)
+    this.from_point = {x: 0, y: 0}; //точка от которой двигаемся, не реализовано
 }
 /*Функция движения квадратика
  * boolean move - двигаться или нет
@@ -125,12 +129,19 @@ function Rectangle(color, angle, dx, dy) {
  */
 Rectangle.prototype.move = function(move, chain){
 if(move){
-         this.to_point.x = chain[this.index_of_next_point].x;
-         this.to_point.y = chain[this.index_of_next_point].y;
+         this.to_point.x = chain[this.index_of_next_point].x; //инициализируем следующую точку
+         this.to_point.y = chain[this.index_of_next_point].y; 
+
+         /*если координаты квадратика совпадают с координатами седующей точки (уже приехали)
+          */
          if(Math.round(this.dx)==this.to_point.x && Math.round(this.dy)==this.to_point.y){
+
+          // то индекс следующей точки увеличиваем а 1
              this.index_of_next_point++;
              this.index_of_curr_point++;
-             this.color = get_random_color();
+             this.color = get_random_color(); //меняем цвет квадрата
+
+             //если дошли до последней точки, то следующей точкой будет первая (цикл)
              if(this.index_of_next_point == chain.length){
                  this.index_of_next_point = 0;
              }
@@ -138,6 +149,8 @@ if(move){
                  this.index_of_curr_point = 0;
              }
          }
+
+         //кубик перемещается по вектору следующая точка минус нынешнее местоположения делённое на 10 сегментов
          this.dx += (chain[this.index_of_next_point].x - this.dx)/(10);
          this.dy += (chain[this.index_of_next_point].y - this.dy)/(10);
     }
@@ -146,11 +159,13 @@ if(move){
 /*Рисуем квадратик*/
 Rectangle.prototype.draw = function(context){
     this.rotate += this.angle;
+    
     var cos = Math.cos(this.rotate),
         sin = Math.sin(this.rotate);
 
     context.save();
     context.fillStyle = this.color;
+    //крутим квадратик
     context.transform(cos, sin, -sin, cos, this.dx, this.dy);
 
     context.fillRect(-25, -25, 50, 50);
@@ -158,7 +173,7 @@ Rectangle.prototype.draw = function(context){
     context.restore();
 }
 
-/*Точка
+/*Точка (правильнее было назвать Point, но я в начале ступил, ща впадлу везде менять)
  * radius - радиус =)
  * color - цвет в шеснадцатеричном
  * x,y - координаты
@@ -174,7 +189,7 @@ function Ball (radius, color, x, y) {
     this.lineWidth = 1;
 }
 
-/*Рисуе мшарик*/
+/*Рисуем шарик (чистый html5)*/
 Ball.prototype.draw = function (context) {
     context.save();
     context.translate(this.x, this.y);
@@ -190,7 +205,7 @@ Ball.prototype.draw = function (context) {
     context.restore();
 };
 
-//Функция возвращает квадрат в которой вписан шарик
+//Функция возвращает квадрат, в которой вписан шарик
 Ball.prototype.getBounds = function () {
     return {
         x: this.x - this.radius,
@@ -199,4 +214,3 @@ Ball.prototype.getBounds = function () {
             height: this.radius * 2
     };
 };
-

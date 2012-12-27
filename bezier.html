@@ -44,17 +44,21 @@ window.onload = function(){
 
     document.getElementById('files').addEventListener('change', readlob, false);
 
+
+    //получаем холст "канвас"
     var canvas = document.getElementById('canvas'),
         context = canvas.getContext('2d'),
         mouse = utils.captureMouse(canvas),
         balls = new Array;
 
-
+    //событие при двойном клике мышью (создание точки)
     canvas.addEventListener('dblclick', function(){
         var tmp_ball =  new Ball(5, get_random_color(), mouse.x, mouse.y);
         balls.push(tmp_ball);
     }, false);
-
+    
+    //событие при нажатии на левую кнопку мыши
+    //если под курсор попадает точка, то захватываем её (dragged = true)
     canvas.addEventListener('mousedown', function(){
         for(var i=balls.length-1; i>=0; i--){
             if(utils.containsPoint(balls[i].getBounds() , mouse.x, mouse.y)){
@@ -64,14 +68,19 @@ window.onload = function(){
                 return true;
             }
         }
-    }, false);
+        }, false);
+
+    //когда отпускаем кнопку мыши отпускаем захваты все (dragged = false)
     canvas.addEventListener('mouseup', function(){
         if(balls.some(function(ball){return ball.dragged})){
             balls.forEach(function(ball, i){
                 ball.dragged = false;
             });
         }
-    }, false);
+        }, false);
+
+    //перемещение курсора мыши
+    //все захваченные точки будут перемещаться
     canvas.addEventListener('mousemove', function () {
         balls.forEach(function(ball, i){
             if (ball.dragged) {
@@ -94,16 +103,18 @@ window.onload = function(){
         window.requestAnimationFrame(drawFrame, canvas);
         context.clearRect(0, 0, canvas.width, canvas.height);
 
+        //рисуем кривую в зависимости от типа 3 или 4
         for(var i=0; i<balls.length-(balls.length % typeOfCurve); i+=typeOfCurve){
             var a = (typeOfCurve == 3) ? new CurveBezier(balls[i], balls[i+1], balls[i+2], 30, "#f00")
                     : new CubicBezier(balls[i], balls[i+1], balls[i+2], balls[i+3], 30, "#f00");
             a.draw(context);
         }
-
+        //рисуем точки
         balls.forEach(function(ball){
             ball.draw(context);
         });
 
+        //вывод координат в консоль
         if(logInfo){
             console.log(JSON.stringify(balls));
             logInfo = false;
