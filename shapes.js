@@ -107,6 +107,106 @@ CurveBezier.prototype.draw = function (context) {
     context.restore();
 }
 
+/*Треугольник
+ * Point3d a, b, c - точки треугольника
+ * string color цвет в шестнадцатеричном коде 
+ */ 
+function Triangle (a, b, c, color) {
+  this.pointA = a;
+  this.pointB = b;
+  this.pointC = c;
+  this.color = (color === undefined) ? "#ff0000" : color;
+  this.lineWidth = 1; //толщина контура
+  this.alpha = 1; //непрозрачность 0-1
+}
+/*собственно рисуем треугольник, стандартными lineTo и moveTo
+ * только координаты точек получаем через функции getScreenX и getScreenY (см в point3d.js)
+ */
+Triangle.prototype.draw = function (context) {
+//если это задняя сторона - не рисовать
+    if (this.isBackface()) {
+    return;
+  }
+  context.save();
+  context.lineWidth = this.lineWidth;
+  context.fillStyle = context.strokeStyle = this.getAdjustedColor();
+  context.beginPath();
+  context.moveTo(this.pointA.getScreenX(), this.pointA.getScreenY());
+  context.lineTo(this.pointB.getScreenX(), this.pointB.getScreenY());
+  context.lineTo(this.pointC.getScreenX(), this.pointC.getScreenY());
+  context.closePath();
+  context.fill();
+  if (this.lineWidth > 0) {
+    context.stroke();
+  }
+  context.restore();
+};
+//функция определения положения объекта, для сортировки (чтобы отображать только передние слои)
+Triangle.prototype.getDepth = function () {
+  return Math.min(this.pointA.z, this.pointB.z, this.pointC.z);
+};
+
+//проверка на это задняя сторона?
+Triangle.prototype.isBackface = function () {
+  var cax = this.pointC.getScreenX() - this.pointA.getScreenX(),
+      cay = this.pointC.getScreenY() - this.pointA.getScreenY(),
+      bcx = this.pointB.getScreenX() - this.pointC.getScreenX(),
+      bcy = this.pointB.getScreenY() - this.pointC.getScreenY();
+  return cax * bcy > cay * bcx;
+};
+//Лампочка, координаты и яркость - параметры
+function Light (x, y, z, brightness) {
+  this.x = (x === undefined) ? -100 : x;
+  this.y = (y === undefined) ? -100 : y;
+  this.z = (z === undefined) ? -100 : z;
+  this.brightness = (brightness === undefined) ? 1 : brightness;
+}
+//ввод яркости с проверкой на дурака
+Light.prototype.setBrightness = function (b) {
+  this.brightness = Math.min(Math.max(b, 0), 1);
+};
+//получаем цвет в зависимости от падения света
+Triangle.prototype.getAdjustedColor = function () {
+  var color = utils.parseColor(this.color, true),
+      red = color >> 16,
+      green = color >> 8 & 0xff,
+      blue = color & 0xff,
+      lightFactor = this.getLightFactor();
+  red *= lightFactor;
+  green *= lightFactor;
+  blue *= lightFactor;
+  return utils.parseColor(red << 16 | green << 8 | blue);
+};
+
+//та самая зависимость от падения света (фактор света)
+Triangle.prototype.getLightFactor = function () {
+  //берём два вектора (стороны треугольника AB и BC) 
+  //чтобы потом определить вектор нормали
+    var ab = {
+    x: this.pointA.x - this.pointB.x,
+    y: this.pointA.y - this.pointB.y,
+    z: this.pointA.z - this.pointB.z
+  };
+  var bc = {
+    x: this.pointB.x - this.pointC.x,
+    y: this.pointB.y - this.pointC.y,
+    z: this.pointB.z - this.pointC.z
+  };
+  //определяем вектор нормали
+  var norm = {
+    x:  (ab.y * bc.z) - (ab.z * bc.y),
+    y:-((ab.x * bc.z) - (ab.z * bc.x)),
+    z:  (ab.x * bc.y) - (ab.y * bc.x)
+  };
+  //dotprod это скалярное произведение, которое покажет рахницу между вектором нормали и вектором света
+  var dotProd = norm.x * this.light.x + norm.y * this.light.y + norm.z * this.light.z,
+      //величина нормали и света
+      normMag = Math.sqrt(norm.x * norm.x + norm.y * norm.y + norm.z * norm.z),
+      lightMag = Math.sqrt(this.light.x * this.light.x + this.light.y * this.light.y + this.light.z * this.light.z);
+  //МАГИЧЕСКАЯ ФОРМУЛА
+  //по сути вычисляет угол падения света от которого зависит степень изменения цвета
+  return (Math.acos(dotProd / (normMag * lightMag)) / Math.PI) * this.light.brightness;
+};
 /*Прямоугольник
  * color - цвет
  * angle - угол поворота

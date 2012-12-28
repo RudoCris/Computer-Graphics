@@ -1,3 +1,5 @@
+
+
 //Получение рандомного цвета
 function get_random_color() {
     var letters = '0123456789ABCDEF'.split('');
@@ -46,4 +48,24 @@ utils.containsPoint = function (rect, x, y) {
            x > rect.x + rect.width ||
            y < rect.y ||
            y > rect.y + rect.height);
+};
+
+/**
+ * Возвращает цвет в формате: '#RRGGBB', или в hex number.
+ */
+utils.parseColor = function (color, toNumber) {
+  if (toNumber === true) {
+    if (typeof color === 'number') {
+      return (color | 0); //chop off decimal
+    }
+    if (typeof color === 'string' && color[0] === '#') {
+      color = color.slice(1);
+    }
+    return window.parseInt(color, 16);
+  } else {
+    if (typeof color === 'number') {
+      color = '#' + ('00000' + (color | 0).toString(16)).substr(-6); //pad
+    }
+    return color;
+  }
 };
