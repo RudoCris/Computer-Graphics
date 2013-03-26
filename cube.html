@@ -103,8 +103,8 @@ function onKeyboardEvent (event) {
 
         angleX = (mouse.y - vpY) * 0.0005;
         angleY = (mouse.x - vpX) * 0.0005;
-       // angleX = (ry - vpY) * 0.0005;
-       // angleY = (rx - vpX) * 0.0005;
+        //angleX = (ry - vpY) * 0.0005;
+        //angleY = (rx - vpX) * 0.0005;
         points.forEach(move);
         triangles.sort(depth);
         triangles.forEach(draw);
